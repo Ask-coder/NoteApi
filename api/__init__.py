@@ -42,4 +42,4 @@ def verify_password(username, password):
 @basic_auth.get_user_roles
 @token_auth.get_user_roles
 def get_user_roles(user):
-    return g.user.get_roles()
+    return user.get_roles()
