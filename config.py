@@ -14,7 +14,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Зачем эта настройка: https://flask-sqlalchemy-russian.readthedocs.io/ru/latest/config.html#id2
     DEBUG = True
     PORT = 5000
-    SECRET_KEY = "My secret key =)"
+    SECRET_KEY = "supeR secret KeyS"
     RESTFUL_JSON = {
         'ensure_ascii': False,
     }
