@@ -1,10 +1,22 @@
 from api import Resource, abort, reqparse, auth, db
 from api.models.user import UserModel
-from api.schemas.user import user_schema, users_schema
+from api.schemas.user import user_schema,  users_schema
+from api.schemas.user import UserSchema, UserRequestSchema
+from flask_apispec.views import MethodResource
+from flask_apispec import marshal_with, use_kwargs, doc
 
 
-class UserResource(Resource):
+@doc(description='Api for notes.', tags=['Users'])
+class UserResource(MethodResource):
+    @marshal_with(UserSchema, code=200)
     def get(self, user_id):
+        # language=YAML
+        """
+        Get User by id
+        ---
+        tags:
+            - User
+        """
         user = UserModel.query.get(user_id)
         if user is None:
             abort(404, error=f"User with id={user_id} not found")
@@ -12,6 +24,32 @@ class UserResource(Resource):
 
     @auth.login_required(role="admin")
     def put(self, user_id):
+        # language = YAML
+        """
+        Get User by id
+        ---
+        tags:
+            - Users
+        parameters:
+            - in: path
+              name: user_id
+              type: integer
+              required: true
+              default: 1
+        responses:
+            200:
+                description: A single user item
+                schema:
+                id: User
+                properties:
+                id:
+                    type: integer
+                username:
+                    type: string
+                is_staff:
+                    type: boolean
+
+        """
         parser = reqparse.RequestParser()
         parser.add_argument("username", required=True)
         user_data = parser.parse_args()
@@ -31,17 +69,19 @@ class UserResource(Resource):
         return "", 204
 
 
-class UsersListResource(Resource):
+class UsersListResource(MethodResource):
+    @marshal_with(UserSchema(many=True), code=200)
     def get(self):
         users = UserModel.query.all()
         return users_schema.dump(users), 200
 
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", required=True)
-        parser.add_argument("password", required=True)
-        user_data = parser.parse_args()
-        user = UserModel(**user_data)
+    @use_kwargs(UserRequestSchema, location='json')
+    def post(self, **kwargs):
+        # parser = reqparse.RequestParser()
+        # parser.add_argument("username", required=True)
+        # parser.add_argument("password", required=True)
+        # user_data = parser.parse_args()
+        user = UserModel(**kwargs)
         user.save()
         if not user.id:
             abort(400, error=f"User with username:{user.username} already exist")
