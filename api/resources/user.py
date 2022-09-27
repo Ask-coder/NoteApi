@@ -1,4 +1,4 @@
-from api import Resource, abort, reqparse, auth
+from api import Resource, abort, reqparse, auth, db
 from api.models.user import UserModel
 from api.schemas.user import user_schema, users_schema
 
@@ -22,7 +22,13 @@ class UserResource(Resource):
 
     @auth.login_required
     def delete(self, user_id):
-        raise NotImplemented  # не реализовано!
+        user = UserModel.query.get(user_id)
+        if user is None:
+            return {f'User with {user_id=} not found'}, 404
+
+        db.session.delete(user)
+        db.session.commit()
+        return "", 204
 
 
 class UsersListResource(Resource):
