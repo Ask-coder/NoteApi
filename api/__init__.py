@@ -9,32 +9,11 @@ from flask_httpauth import HTTPBasicAuth
 from flask_httpauth import HTTPTokenAuth
 from flask_httpauth import MultiAuth
 from flasgger import Swagger
-from apispec import APISpec
-from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec.extension import FlaskApiSpec
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
-security_definitions = {
-    "basicAuth": {
-        "type": "basic"
-    }
-}
-app.config.update({
-   'APISPEC_SPEC': APISpec(
-       title='Notes Project',
-       version='v1',
-       plugins=[MarshmallowPlugin()],
-       securityDefinitions=security_definitions,
-       securitu=[],
-       openapi_version='2.0.0'
-   ),
-   'APISPEC_SWAGGER_URL': '/swagger', # URI API Doc JSON
-   'APISPEC_SWAGGER_UI_URL': '/swagger-ui'# URI UI of API Doc
-})
-
 
 api = Api(app)
 db = SQLAlchemy(app)

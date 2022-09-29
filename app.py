@@ -4,8 +4,6 @@ from api.resources.user import UserResource, UsersListResource
 from api.resources.auth import TokenResource
 from config import Config
 
-
-
 # CRUD
 
 # Create --> POST
@@ -28,6 +26,8 @@ api.add_resource(NoteResource,
                  )
 docs.register(UserResource)
 docs.register(UsersListResource)
+docs.register(NoteResource)
+docs.register(NotesListResource)
 
 if __name__ == '__main__':
     app.run(debug=Config.DEBUG, port=Config.PORT)

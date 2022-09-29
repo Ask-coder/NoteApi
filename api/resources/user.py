@@ -1,6 +1,6 @@
 from api import Resource, abort, reqparse, auth, db
 from api.models.user import UserModel
-from api.schemas.user import user_schema,  users_schema
+from api.schemas.user import user_schema, users_schema
 from api.schemas.user import UserSchema, UserRequestSchema
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, use_kwargs, doc
@@ -22,8 +22,10 @@ class UserResource(MethodResource):
             abort(404, error=f"User with id={user_id} not found")
         return user_schema.dump(user), 200
 
-    @auth.login_required(role="admin")
-    def put(self, user_id):
+    @auth.login_required
+    @doc(security=[{'basicAuth': []}])
+    @use_kwargs(UserRequestSchema, location='json')
+    def put(self, **kwargs):
         # language = YAML
         """
         Get User by id
@@ -50,15 +52,14 @@ class UserResource(MethodResource):
                     type: boolean
 
         """
-        parser = reqparse.RequestParser()
-        parser.add_argument("username", required=True)
-        user_data = parser.parse_args()
-        user = UserModel.query.get(user_id)
-        user.username = user_data["username"]
+        user = UserModel.query.get(kwargs['user_id'])
+        user.username = kwargs["username"]
+        user.password_hash = user.hash_password(kwargs['password'])
         user.save()
         return user_schema.dump(user), 200
 
     @auth.login_required
+    @doc(security=[{'basicAuth': []}])
     def delete(self, user_id):
         user = UserModel.query.get(user_id)
         if user is None:
@@ -69,6 +70,7 @@ class UserResource(MethodResource):
         return "", 204
 
 
+@doc(description='Api for notes', tags=['Users'])
 class UsersListResource(MethodResource):
     @marshal_with(UserSchema(many=True), code=200)
     def get(self):
@@ -77,10 +79,6 @@ class UsersListResource(MethodResource):
 
     @use_kwargs(UserRequestSchema, location='json')
     def post(self, **kwargs):
-        # parser = reqparse.RequestParser()
-        # parser.add_argument("username", required=True)
-        # parser.add_argument("password", required=True)
-        # user_data = parser.parse_args()
         user = UserModel(**kwargs)
         user.save()
         if not user.id:
