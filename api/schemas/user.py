@@ -1,5 +1,6 @@
 from api import ma
 from api.models.user import UserModel
+# from api.models.note import NoteModel
 
 
 #       schema        flask-restful

@@ -8,6 +8,8 @@ from flask_apispec import marshal_with, use_kwargs, doc
 
 @doc(description='Api for notes.', tags=['Users'])
 class UserResource(MethodResource):
+    @doc(summary='Get user by id', description='Returns user')
+    # @doc(responses={404: {"User not found"}})
     @marshal_with(UserSchema, code=200)
     def get(self, user_id):
         # language=YAML
@@ -20,11 +22,13 @@ class UserResource(MethodResource):
         user = UserModel.query.get(user_id)
         if user is None:
             abort(404, error=f"User with id={user_id} not found")
-        return user_schema.dump(user), 200
+        return user, 200
 
     @auth.login_required
     @doc(security=[{'basicAuth': []}])
+    @doc(summary='Create new user', description='Advanced ')
     @use_kwargs(UserRequestSchema, location='json')
+    @marshal_with(UserSchema, code=201)
     def put(self, **kwargs):
         # language = YAML
         """
@@ -83,4 +87,4 @@ class UsersListResource(MethodResource):
         user.save()
         if not user.id:
             abort(400, error=f"User with username:{user.username} already exist")
-        return user_schema.dump(user), 201
+        return user, 201
