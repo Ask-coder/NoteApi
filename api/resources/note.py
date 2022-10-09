@@ -26,6 +26,7 @@ class NoteResource(MethodResource):
 
     @auth.login_required
     @use_kwargs(NoteRequestSchema, location='json')
+    @marshal_with(NoteSchema)
     def put(self, **kwargs):
         """
         Пользователь может редактировать ТОЛЬКО свои заметки
@@ -34,14 +35,15 @@ class NoteResource(MethodResource):
         note = NoteModel.query.get(kwargs['note_id'])
 
         if not note:
-            abort(404, error=f"note {note_id} not found")
+            abort(404, error=f'note {kwargs["text"]} not founds')
         if note.author != author:
             abort(403, error=f"Forbidden")
 
         note.text = kwargs["text"]
+        note.tags.append()
         note.private = kwargs.get("private") or note.private
         note.save()
-        return note_schema.dump(note), 200
+        return note, 200
 
     @auth.login_required
     @doc(description='Delete note by id', security=[{"basicAuth": []}])
@@ -86,8 +88,9 @@ class NoteSetTagsResource(MethodResource):
     def put(self, note_id, **kwargs):
         note = NoteModel.query.get(note_id)
         if note is None:
-            abort (404, error = f'note_id not found')
+            abort (404, error=f'note_id not found')
         #TODO: Получить все теги по одному запросу
+        tags = TagModel.query.all()
         for tag_id in kwargs["tags"]:
             tag = TagModel.query.get(tag_id)
             note.tags.append(tag)

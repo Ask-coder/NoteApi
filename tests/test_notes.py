@@ -20,20 +20,8 @@ def note(user):
     return note
 
 
-@pytest.fixture()
-def user_admin():
-    user_data = {"username": "admin", "password": "admin"}
-    user = UserModel(**user_data)
-    user.save()
-    return user
 
 
-@pytest.fixture()
-def note_admin(user_admin):
-    note_data = {"author_id": user_admin.id, "text": "Note for admin"}
-    note = NoteModel(**note_data)
-    note.save()
-    return note
 
 
 def test_note_get_by_id(client, note, auth_headers):

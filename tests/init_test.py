@@ -3,6 +3,7 @@ from app import app
 from config import Config
 from base64 import b64encode
 from api.models.user import UserModel
+from api.models.note import NoteModel
 import pytest
 
 
@@ -35,3 +36,19 @@ def auth_headers(user_admin):
             f"{user_data['username']}:{user_data['password']}".encode('ascii')).decode('utf-8')
     }
     return headers
+
+@pytest.fixture()
+def user_admin():
+    user_data = {"username": "admin", "password": "admin"}
+    user = UserModel(**user_data)
+    user.save()
+    return user
+
+@pytest.fixture()
+def note_admin(user_admin):
+    note_data = {"author_id": user_admin.id, "text": "Note for admin"}
+    note = NoteModel(**note_data)
+    note.save()
+    return note
+
+
